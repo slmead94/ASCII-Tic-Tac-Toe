@@ -58,11 +58,11 @@ class Board:
             for j in range(0, self.x_len):
                 if i == 0:
                     # in this case i equals zero so multiplying by 2 is pointless
-                    new_board[i].append(i + 1 * j + 1)
+                    new_board[i].append(i + 1 * j + i + 1)  # i = 0 in this so 1 is added to the operation
                 elif i == 1:
-                    new_board[i].append(i * 2 + 1 * j + 2)
+                    new_board[i].append(i * 2 + 1 * j + i + 1)  # i = 1 in this so 2 is added to the operation
                 elif i == 2:
-                    new_board[i].append(i * 2 + 1 * j + 3)
+                    new_board[i].append(i * 2 + 1 * j + i + 1)  # i = 2 in this so 3 is added to the operation
 
         return new_board
 
