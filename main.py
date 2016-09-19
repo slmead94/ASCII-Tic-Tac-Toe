@@ -126,7 +126,7 @@ class Game:
         global user_last
         more = False
         move = 0
-        # all of these are winning combinations that will be checked for
+        # all of these are winning combinations that the program can use to reference later
         references = [[game_board[0][0], game_board[0][1], game_board[0][2]],
                       [game_board[1][0], game_board[1][1], game_board[1][2]],
                       [game_board[2][0], game_board[2][1], game_board[2][2]],
@@ -136,7 +136,7 @@ class Game:
                       [game_board[0][0], game_board[1][1], game_board[2][2]],
                       [game_board[0][2], game_board[1][1], game_board[2][0]]]
 
-        if who == "Computer":
+        if who == "Computer":  # this sets the game_mode of the computer based on what the user said earlier
             if self.game_mode == "Novice":
                 self.beginner()
 
@@ -195,7 +195,7 @@ class Game:
         """
         comp_more = False
         moves = [1, 3, 7, 9]
-        if user_last in moves:
+        if user_last in moves:  # 1, 3, 7, & 9 are all corners
             if user_last == 1:
                 moves = [2, 4, 5]
             elif user_last == 3:
@@ -218,6 +218,21 @@ class Game:
                     for i in range(0, 2):
                         moves.append(random.choice(open_moves))
                     comp_more = False
+
+        """
+        Example board so you can see how the numbers correspond to the board:
+
+        Board:
+        _____________
+        | 1 | 2 | 3 |
+        _____________
+        | 4 | 5 | 6 |
+        _____________
+        | 7 | 8 | 9 |
+
+        2, 4, 6, & 8 are bad moves unless your about to win or are blocking someone
+
+        """
 
         elif user_last in [2, 4, 6, 8]:
             if 5 in open_moves:
