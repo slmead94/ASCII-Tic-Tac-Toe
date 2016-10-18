@@ -79,16 +79,16 @@ class Screen:
     def finalize(winner):
         if winner == "none":
             print
-            print "Final Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
+            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
         elif winner.lower() == "user":
             print "Congratulations!"
             print "You have beaten the computer!"
             print
-            print "Final Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
+            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
         else:
             print "Well... You lost."
             print
-            print "Final Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
+            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
 
     def print_board(self, grid, title="Example Board"):
         print "\n"
@@ -193,6 +193,22 @@ class Game:
         which in turn is going to make it at least a little harder for the
         opponent to easily win
         """
+
+        """
+        Example board so you can see how the numbers correspond to the board:
+
+        Board:
+        _____________
+        | 1 | 2 | 3 |
+        _____________
+        | 4 | 5 | 6 |
+        _____________
+        | 7 | 8 | 9 |
+
+        2, 4, 6, & 8 are bad moves unless your about to win or are blocking someone
+
+        """
+
         comp_more = False
         moves = [1, 3, 7, 9]
         if user_last in moves:  # 1, 3, 7, & 9 are all corners
@@ -218,21 +234,6 @@ class Game:
                     for i in range(0, 2):
                         moves.append(random.choice(open_moves))
                     comp_more = False
-
-        """
-        Example board so you can see how the numbers correspond to the board:
-
-        Board:
-        _____________
-        | 1 | 2 | 3 |
-        _____________
-        | 4 | 5 | 6 |
-        _____________
-        | 7 | 8 | 9 |
-
-        2, 4, 6, & 8 are bad moves unless your about to win or are blocking someone
-
-        """
 
         elif user_last in [2, 4, 6, 8]:
             if 5 in open_moves:
@@ -386,7 +387,7 @@ class Game:
         elif game_board[0][2] == game_board[1][1] == game_board[2][0]:
             test_tile = game_board[0][2]
         elif not open_moves:
-            print "It looks like we have a cats game!"
+            print "It looks like we have a cats game!"  # this repeats for some reason
             user_game.ties += 1
             computer_game.ties += 1
             init_screen.finalize("none")
@@ -451,7 +452,6 @@ def get_info():
 def main_game():
     more = True
     while more:
-        user_game.choose_spot(player.name)
         if computer_game.winner or user_game.winner:
             if computer_game.winner:
                 winner = "CPU"
@@ -459,18 +459,24 @@ def main_game():
                 winner = "User"
             init_screen.finalize(winner)
             more = False
-        else:
+
+        user_game.choose_spot(player.name)
+
+        if open_moves:
             print "\nThe computer is choosing it's move",
             util.loading()
             computer_game.choose_spot(comp_player.name)
 
-            if not computer_game.winner and not user_game.winner:
+            if computer_game.winner not in ["CPU", "none"] and user_game.winner not in ["User", "none"]:
                 more = True
             else:
-                if computer_game.winner:
+                if computer_game.winner == "CPU":
                     winner = "CPU"
-                else:
+                elif user_game.winner == "User":
                     winner = "User"
+                else:
+                    winner = "none"
+
                 init_screen.finalize(winner)
                 more = False
 
