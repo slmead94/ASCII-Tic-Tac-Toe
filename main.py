@@ -85,10 +85,12 @@ class Screen:
             print "You have beaten the computer!"
             print
             print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
-        else:
+        elif winner.lower() == "cpu":
             print "Well... You lost."
             print
             print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
+
+        print  # give a new line ; this goes to: "Would you like to play again?"
 
     def print_board(self, grid, title="Example Board"):
         print "\n"
@@ -126,6 +128,7 @@ class Game:
         global user_last
         more = False
         move = 0
+
         # all of these are winning combinations that the program can use to reference later
         references = [[game_board[0][0], game_board[0][1], game_board[0][2]],
                       [game_board[1][0], game_board[1][1], game_board[1][2]],
@@ -171,8 +174,8 @@ class Game:
     def beginner(self):
         comp_more = False
         move = 0
-        # in tic tac toe strategies these are all labeled as bad moves...
-        # you really can't lose if you play novice
+        # in tic tac toe these moves are all terrible choices at the beginning of the game...
+        # ...you really can't lose if you play novice
         moves = [2, 4, 6, 8]
         while not comp_more:
             if moves[0] or moves[1] or moves[2] or moves[3] in open_moves:
@@ -192,9 +195,9 @@ class Game:
         This method places a coordinate based on what the user last played
         which in turn is going to make it at least a little harder for the
         opponent to easily win
-        """
 
-        """
+        *********************************************************************
+
         Example board so you can see how the numbers correspond to the board:
 
         Board:
@@ -205,20 +208,21 @@ class Game:
         _____________
         | 7 | 8 | 9 |
 
-        2, 4, 6, & 8 are bad moves unless your about to win or are blocking someone
+
+        2, 4, 6, & 8 are bad moves to start out with
 
         """
 
         comp_more = False
-        moves = [1, 3, 7, 9]
-        if user_last in moves:  # 1, 3, 7, & 9 are all corners
-            if user_last == 1:
+        moves = [1, 3, 7, 9]  # the corners of the board
+        if user_last in moves:
+            if user_last == 1:  # top left
                 moves = [2, 4, 5]
-            elif user_last == 3:
+            elif user_last == 3:  # top right
                 moves = [2, 5, 6]
-            elif user_last == 7:
+            elif user_last == 7:  # bottom left
                 moves = [4, 5, 8]
-            elif user_last == 9:
+            elif user_last == 9:  # last slot
                 moves = [5, 6, 8]
 
             while not comp_more:
@@ -281,6 +285,7 @@ class Game:
                     self.place_tile(int(move), "CPU")
                     done = True
                     break
+
             # X O X
             elif references[i][0] == user_game.tile and references[i][0] != references[i][1] and references[i][0] == references[i][2]:
                 move = references[i][1]
@@ -290,6 +295,7 @@ class Game:
                     self.place_tile(int(move), "CPU")
                     done = True
                     break
+
             # O X X
             elif references[i][1] == user_game.tile and references[i][0] != references[i][1] and references[i][1] == references[i][2]:
                 move = references[i][0]
@@ -302,11 +308,20 @@ class Game:
         return done  # return True if the algorithm actually placed a tile
 
     def offense(self, references):
+        """
+
+        :param references: the set of winning combinations on the board - 1, 2, & 3  ;  1, 5, & 9  ;  etc.
+        :return: returns true if the method placed a tile when it ran
+
+        This is really just an extension of defense() for the Expert game mode
+
+        """
+
         yes = False
         self.check_status()
         for i in range(len(references)):
             # using a break statement in this case is a good idea because if you didn't,
-            # it could possibly give the computer multiple moves
+            # it could possibly give the computer multiple moves!
 
             # X X O
             if references[i][0] == computer_game.tile and references[i][0] == references[i][1] and references[i][1] != references[i][2]:
@@ -316,6 +331,7 @@ class Game:
                 self.place_tile(int(move), "CPU")
                 yes = True
                 break
+
             # X O X
             elif references[i][0] == computer_game.tile and references[i][0] != references[i][1] and references[i][0] == references[i][2]:
                 move = references[i][1]
@@ -324,6 +340,7 @@ class Game:
                 self.place_tile(int(move), "CPU")
                 yes = True
                 break
+
             # O X X
             elif references[i][1] == computer_game.tile and references[i][0] != references[i][1] and references[i][1] == references[i][2]:
                 move = references[i][0]
@@ -332,6 +349,7 @@ class Game:
                 self.place_tile(int(move), "CPU")
                 yes = True
                 break
+
         return yes  # return True if the algorithm actually placed a tile
 
     def place_tile(self, spot, who):
@@ -387,20 +405,25 @@ class Game:
         elif game_board[0][2] == game_board[1][1] == game_board[2][0]:
             test_tile = game_board[0][2]
         elif not open_moves:
-            print "It looks like we have a cats game!"  # this repeats for some reason
+            print "\nIt looks like we have a cats game!"
+
             user_game.ties += 1
             computer_game.ties += 1
-            init_screen.finalize("none")
+            user_game.winner = True
+            computer_game.winner = True
 
         # figure out who won
-        if test_tile == player.play_tile:
-            user_game.winner = True
-            user_game.wins += 1
-            computer_game.losses += 1
-        elif test_tile == comp_player.play_tile:
-            computer_game.winner = True
-            computer_game.wins += 1
-            user_game.losses += 1
+        if not user_game.winner or not computer_game.winner:  # make sure it wasn't a tie
+            if test_tile == player.play_tile:
+                user_game.winner = True
+                computer_game.winner = False
+                user_game.wins += 1
+                computer_game.losses += 1
+            elif test_tile == comp_player.play_tile:
+                computer_game.winner = True
+                user_game.winner = False
+                computer_game.wins += 1
+                user_game.losses += 1
 
 
 class Player:
@@ -450,39 +473,43 @@ def get_info():
 
 
 def main_game():
+    initialized = False
     more = True
     while more:
-        if computer_game.winner or user_game.winner:
-            if computer_game.winner:
+        if not computer_game.winner and not user_game.winner:
+            user_game.choose_spot(player.name)
+        else:
+            if computer_game.winner and user_game.winner:
+                winner = "none"
+            elif computer_game.winner:
                 winner = "CPU"
-            else:
+            elif user_game.winner:
                 winner = "User"
+
             init_screen.finalize(winner)
-            more = False
 
-        user_game.choose_spot(player.name)
-
-        if open_moves:
+        if not computer_game.winner and not user_game.winner:
             print "\nThe computer is choosing it's move",
             util.loading()
             computer_game.choose_spot(comp_player.name)
+            more = True
+        else:
+            if computer_game.winner and user_game.winner:
+                winner = "none"
+            elif computer_game.winner:
+                winner = "CPU"
+            elif user_game.winner:
+                winner = "User"
 
-            if computer_game.winner not in ["CPU", "none"] and user_game.winner not in ["User", "none"]:
-                more = True
-            else:
-                if computer_game.winner == "CPU":
-                    winner = "CPU"
-                elif user_game.winner == "User":
-                    winner = "User"
-                else:
-                    winner = "none"
-
+            if not initialized:
                 init_screen.finalize(winner)
+                more = False
+            else:
                 more = False
 
 
 # ******** Main ******** #
-cont = False
+cont = True
 
 init_screen = Screen()  # create the Screen object
 init_screen.print_intro()  # print introductory remarks
@@ -490,22 +517,18 @@ comp_player, player = get_info()  # get_info() returns the two player objects th
 user_game = Game(player.play_tile, player.level)  # create the user's game object
 computer_game = Game(comp_player.play_tile, comp_player.level)  # create the computer's game object
 
-while not cont:
+while cont:  # main game loop
     user_last = None
     open_moves = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-    counted = False
 
     board = Board()  # create game board
     game_board = board.fill()  # and fill it with numbers 1 - 9
     main_game()  # start the bulk of the program
 
-    again = raw_input("Would you like to play again? yes or no: ")  # well?...
-    if util.is_yes(again):
-        counted = True  # if yes then let the program know to reset the winner booleans
-    elif again.lower() != "yes":  # if not yes then end the loop
-        cont = True
-        counted = False
-    if counted:
+    again = raw_input("Would you like to play again? yes or no: ")
+    if util.is_yes(again):  # if they want to play again reset the winner variables and restart the loop
         user_game.winner = False
         computer_game.winner = False
-        cont = False  # continue main loop
+        cont = True  # continue main loop
+    else:
+        cont = False  # end the program
