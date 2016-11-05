@@ -34,6 +34,7 @@ Expert:
 
 import util
 import random
+import time
 
 
 def print_board():
@@ -53,9 +54,9 @@ class Board:
         about the math for a minute, it's not too bad.
         """
         new_board = []
-        for i in range(0, self.x_len):
+        for i in range(0, self.x_len):  # 0 - 3
             new_board.append([])
-            for j in range(0, self.x_len):
+            for j in range(0, self.y_len):  # 0 - 3
                 if i == 0:
                     # in this case i equals zero so multiplying by 2 is pointless
                     new_board[i].append(i + 1 * j + i + 1)  # i = 0 in this so 1 is added to the operation
@@ -77,20 +78,17 @@ class Screen:
 
     @staticmethod
     def finalize(winner):
-        if winner == "none":
-            print
-            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
+        print
+        if winner == "none":  # select specific print statement based on the winner
+            pass
         elif winner.lower() == "user":
             print "Congratulations!"
             print "You have beaten the computer!"
-            print
-            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
         elif winner.lower() == "cpu":
             print "Well... You lost."
-            print
-            print "Stats:\n\nTies: " + str(user_game.ties) + "\nWins: " + str(user_game.wins) + "\nLosses: " + str(user_game.losses)
 
-        print  # give a new line ; this goes to: "Would you like to play again?"
+        print "\nStats:\n\n\tTies: " + str(user_game.ties) + "\n\tWins: " + str(user_game.wins) + "\n\tLosses: " + str(user_game.losses)
+        print  # give a new line... ; this goes to: "Would you like to play again?"
 
     def print_board(self, grid, title="Example Board"):
         print "\n"
@@ -129,7 +127,8 @@ class Game:
         more = False
         move = 0
 
-        # all of these are winning combinations that the program can use to reference later
+        # winning combinations mentioned earlier: 123, 456, 789, 147, 258, 369, 159, 357
+        # references represents all of the winning combinations that we have stated above
         references = [[game_board[0][0], game_board[0][1], game_board[0][2]],
                       [game_board[1][0], game_board[1][1], game_board[1][2]],
                       [game_board[2][0], game_board[2][1], game_board[2][2]],
@@ -209,12 +208,12 @@ class Game:
         | 7 | 8 | 9 |
 
 
-        2, 4, 6, & 8 are bad moves to start out with
+        2, 4, 6, & 8 are bad moves to start out with... as mentioned before
 
         """
 
         comp_more = False
-        moves = [1, 3, 7, 9]  # the corners of the board
+        moves = [1, 3, 7, 9]  # corners of the board
         if user_last in moves:
             if user_last == 1:  # top left
                 moves = [2, 4, 5]
@@ -222,7 +221,7 @@ class Game:
                 moves = [2, 5, 6]
             elif user_last == 7:  # bottom left
                 moves = [4, 5, 8]
-            elif user_last == 9:  # last slot
+            elif user_last == 9:  # last slot ; bottom right
                 moves = [5, 6, 8]
 
             while not comp_more:
@@ -358,11 +357,12 @@ class Game:
         :param spot: the given position that is going to be turned into an X / O
 
         In the below code, spot has to be subtracted from the first item in the comparison list because
-        we are using a 2d array instead of just a 9 item one dimensional array.
+        we are using a 2d array instead of just a 9 item one dimensional (1d) array.
 
         If we were using a 1d array, all we would have to do, would be:    board[spot - 1] = self.tile
         But with a 2d array, we have to get the right position (1, 2, or 3) from a bigger number.
         """
+
         sub = 0
         row = 0
         if spot in [1, 2, 3]:
@@ -372,8 +372,8 @@ class Game:
             row = 1
             sub = 4
         elif spot in [7, 8, 9]:
-            sub = 7
             row = 2
+            sub = 7
 
         game_board[row][spot - sub] = self.tile
         open_moves.remove(spot)
@@ -384,8 +384,9 @@ class Game:
     @staticmethod
     def check_status():
         """
-        This checks to see of anybody has won a game and then
-        figures out who won the game
+        This checks to see of anybody has won a game...
+
+        If so, it will also figure out who has won
         """
         test_tile = ""
         # winning combinations: 123, 456, 789, 147, 258, 369, 159, 357, and vice versa
@@ -441,6 +442,30 @@ def get_info():
     play_tile = ""  # no given tile at this time so we just make the variable a string
 
     name = raw_input("\nEnter your name: ")
+
+    skill = get_level(choose_level, levels, more)
+
+    while not continue_:
+        play_tile = raw_input("\nWould you like to be Xs or Os? X or O: ")
+        continue_ = util.is_x_o(play_tile)
+        if not continue_:
+            print "Your answer must be an X or an O...\n"
+    play_tile = play_tile.upper()
+
+    user = Player(name, play_tile, skill)
+    # the computer will use whatever tile the user didn't choose
+    # that tile is determined here
+    if play_tile == "X":
+        play_tile = "O"
+    else:
+        play_tile = "X"
+    # we set the level for the computer based on the skill level that the user
+    # wants to play
+    comp = Player("Computer", play_tile, skill)
+    return comp, user
+
+
+def get_level(choose_level, levels, more):
     print
     for i in range(0, len(levels)):
         print str(i + 1) + ". " + levels[i]  # looks like:  1. Novice
@@ -450,26 +475,8 @@ def get_info():
         more = util.is_int(choose_level, [1, 2, 3])  # see if what the user returned is viable
         if not more:
             print "That isn't a 1, 2, or 3....\n"  # tell the user to stop messing around
-    level = levels[int(choose_level) - 1]  # assign the level variable to whatever the user chose
-
-    while not continue_:
-        play_tile = raw_input("\nWould you like to be Xs or Os? X or O: ")
-        continue_ = util.is_x_o(play_tile)
-        if not continue_:
-            print "Your answer must be an X or an O...\n"
-    play_tile = play_tile.upper()
-
-    user = Player(name, play_tile, level)
-    # the computer will use whatever tile the user didn't choose
-    # that tile is determined here
-    if play_tile == "X":
-        play_tile = "O"
-    else:
-        play_tile = "X"
-    # we set the level for the computer based on the skill level that the user
-    # wants to play
-    comp = Player("Computer", play_tile, level)
-    return comp, user
+    skill = levels[int(choose_level) - 1]  # assign the level variable to whatever the user chose
+    return skill
 
 
 def main_game():
@@ -529,6 +536,15 @@ while cont:  # main game loop
     if util.is_yes(again):  # if they want to play again reset the winner variables and restart the loop
         user_game.winner = False
         computer_game.winner = False
+
+        change_level = raw_input("\nWould you like to change the skill level setting? yes or no: ")
+        if util.is_yes(change_level):
+            level = get_level("", ["Novice", "Intermediate", "Expert"], False)
+            user_game.game_mode = level
+            computer_game.game_mode = level
+            print "Game mode changed to ", level.lower()
+            print
+            time.sleep(0.5)
         cont = True  # continue main loop
     else:
         cont = False  # end the program
