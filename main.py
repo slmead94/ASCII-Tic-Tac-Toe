@@ -15,19 +15,20 @@ Game Mode Descriptions:
 
 Novice:
     Tries to choose a coordinate from a list of typically
-    bad moves. If it can't do that it just chooses a random
+    bad moves. If it can't do that, it chooses a random
     coordinate.
 
 Intermediate:
     Tries to choose a coordinate based off of the user's
     last move so it can make dancing around the computer
     a little more difficult. Again, if it can't do any
-    of the above it just picks a coordinate.
+    of the above it just picks a random coordinate.
 
 Expert:
     Expert starts out by trying to play offensively.
     If it can't see a near opportunity to win the game,
     it tries to see if it can block it's opponents moves.
+    Again... If all else fails, pick a random coordinate ;)
 
 //*****************************************************//
 """
@@ -77,18 +78,19 @@ class Screen:
         self.ex_board = [["1", "2", "3"], ["4", "5", "6"], ["7", "8", "9"]]
 
     @staticmethod
-    def finalize(winner):
+    def finalize(who_won):
         print
-        if winner == "none":  # select specific print statement based on the winner
+        if who_won == "none":  # select specific print statement based on the winner
             pass
-        elif winner.lower() == "user":
-            print "Congratulations!"
+        elif who_won.lower() == "user":
+            print "Congratulations", player.name + "!"
             print "You have beaten the computer!"
-        elif winner.lower() == "cpu":
+        elif who_won.lower() == "cpu":
             print "Well... You lost."
 
-        print "\nStats:\n\n\tTies: " + str(user_game.ties) + "\n\tWins: " + str(user_game.wins) + "\n\tLosses: " + str(user_game.losses)
-        print  # give a new line... ; this goes to: "Would you like to play again?"
+        print "\n" + player.name + "'s stats:\n\n\tTies:", str(user_game.ties), "\n\tWins:", \
+              str(user_game.wins), "\n\tLosses:", str(user_game.losses)
+        print  # new line... ; this goes to: "Would you like to play again?" at the bottom of the program
 
     def print_board(self, grid, title="Example Board"):
         print "\n"
@@ -124,7 +126,7 @@ class Game:
 
     def choose_spot(self, who):
         global user_last
-        more = False
+        mas = False
         move = 0
 
         # winning combinations mentioned earlier: 123, 456, 789, 147, 258, 369, 159, 357
@@ -159,15 +161,15 @@ class Game:
 
         else:
             print_board()
-            while not more:
+            while not mas:
                 move = raw_input("\nChoose a number that you can see: ")
                 if util.is_int(move, open_moves):
                     move = int(move)
                     user_last = move
-                    more = True
+                    mas = True
                 else:
                     print "You need to pick from the available numbers...\n"
-                    more = False
+                    mas = False
             self.place_tile(move, "user")
 
     def beginner(self):
@@ -406,7 +408,7 @@ class Game:
         elif game_board[0][2] == game_board[1][1] == game_board[2][0]:
             test_tile = game_board[0][2]
         elif not open_moves:
-            print "\nIt looks like we have a cats game!"
+            print "\nIt's a cats game!"
 
             user_game.ties += 1
             computer_game.ties += 1
@@ -435,7 +437,7 @@ class Player:
 
 
 def get_info():
-    more = False
+    mas = False
     continue_ = False
     choose_level = ""
     levels = ["Novice", "Intermediate", "Expert"]  # list of different levels to choose from
@@ -443,7 +445,7 @@ def get_info():
 
     name = raw_input("\nEnter your name: ")
 
-    skill = get_level(choose_level, levels, more)
+    skill = get_level(choose_level, levels, mas)
 
     while not continue_:
         play_tile = raw_input("\nWould you like to be Xs or Os? X or O: ")
@@ -465,23 +467,39 @@ def get_info():
     return comp, user
 
 
-def get_level(choose_level, levels, more):
+def get_level(choose_level, levels, mas):
     print
     for i in range(0, len(levels)):
         print str(i + 1) + ". " + levels[i]  # looks like:  1. Novice
 
-    while not more:
+    while not mas:
         choose_level = raw_input("Choose the number related to the level you would like to play: ")
-        more = util.is_int(choose_level, [1, 2, 3])  # see if what the user returned is viable
-        if not more:
+        mas = util.is_int(choose_level, [1, 2, 3])  # see if what the user returned is viable
+        if not mas:
             print "That isn't a 1, 2, or 3....\n"  # tell the user to stop messing around
     skill = levels[int(choose_level) - 1]  # assign the level variable to whatever the user chose
     return skill
 
 
-def main_game():
-    initialized = False
-    more = True
+# ******** Main ******** #
+cont = True
+
+init_screen = Screen()  # create the Screen object
+init_screen.print_intro()  # print introductory remarks
+comp_player, player = get_info()  # get_info() returns the two player objects that we use
+user_game = Game(player.play_tile, player.level)  # create the user's game object
+computer_game = Game(comp_player.play_tile, comp_player.level)  # create the computer's game object
+
+while cont:  # main game loop
+    user_last = None
+    initialized = False  # for nested loop
+    more = True  # for nested loop
+    open_moves = [1, 2, 3, 4, 5, 6, 7, 8, 9]
+
+    board = Board()  # create game board
+    game_board = board.fill()  # fill with numbers 1 - 9
+
+    # Below is the loop that controls the game until someone has won
     while more:
         if not computer_game.winner and not user_game.winner:
             user_game.choose_spot(player.name)
@@ -513,24 +531,6 @@ def main_game():
                 more = False
             else:
                 more = False
-
-
-# ******** Main ******** #
-cont = True
-
-init_screen = Screen()  # create the Screen object
-init_screen.print_intro()  # print introductory remarks
-comp_player, player = get_info()  # get_info() returns the two player objects that we use
-user_game = Game(player.play_tile, player.level)  # create the user's game object
-computer_game = Game(comp_player.play_tile, comp_player.level)  # create the computer's game object
-
-while cont:  # main game loop
-    user_last = None
-    open_moves = [1, 2, 3, 4, 5, 6, 7, 8, 9]
-
-    board = Board()  # create game board
-    game_board = board.fill()  # and fill it with numbers 1 - 9
-    main_game()  # start the bulk of the program
 
     again = raw_input("Would you like to play again? yes or no: ")
 
