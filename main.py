@@ -533,18 +533,24 @@ while cont:  # main game loop
     main_game()  # start the bulk of the program
 
     again = raw_input("Would you like to play again? yes or no: ")
+
     if util.is_yes(again):  # if they want to play again reset the winner variables and restart the loop
         user_game.winner = False
         computer_game.winner = False
 
         change_level = raw_input("\nWould you like to change the skill level setting? yes or no: ")
+
         if util.is_yes(change_level):
-            level = get_level("", ["Novice", "Intermediate", "Expert"], False)
-            user_game.game_mode = level
-            computer_game.game_mode = level
-            print "Game mode changed to ", level.lower()
+            level_ = get_level("", ["Novice", "Intermediate", "Expert"], False)
+            user_game.game_mode = level_
+            computer_game.game_mode = level_
+
+            print "\nGame mode changed to", level_,
             print
             time.sleep(0.5)
+            print "[*******************************************]\n"
+
         cont = True  # continue main loop
-    else:
+
+    else:  # if they don't want to play again...
         cont = False  # end the program
