@@ -31,6 +31,11 @@ Expert:
     Again... If all else fails, pick a random coordinate ;)
 
 //*****************************************************//
+
+Bug(s):
+
+    Added 2 losses to user's stats after playing 2 games...
+    the first of them won, the other not yet finished (it cut the game off)
 """
 
 import util
